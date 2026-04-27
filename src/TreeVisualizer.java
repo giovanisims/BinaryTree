@@ -24,8 +24,8 @@ public class TreeVisualizer extends Application {
     }
 
     private int xCounter = 0;
-    private final int H_SPACING = 50;
-    private final int V_SPACING = 70;
+    private final int H_SPACING = 25;
+    private final int V_SPACING = 50;
 
     private void calculateXCoords(Node<?> node, Map<Node<?>, Integer> xCoords) {
         if (node == null) return;
@@ -119,7 +119,7 @@ public class TreeVisualizer extends Application {
         primaryStage.show();
     }
 
-    public static void main(String[] args) {
-        launch(args);
+    public static void Launch() {
+        launch();
     }
 }
