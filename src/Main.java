@@ -1,6 +1,5 @@
 public class Main {
     public static void main(String[] args) {
-        TreeVisualizer.Launch();
+        ConsoleMenu.run();
     }
 }
-

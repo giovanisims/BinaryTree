@@ -59,7 +59,6 @@ public class BinarySearchTree<T extends Comparable<T>> {
 
 
     public Node<T> Search(T value) { return SearchRecursive(root, value); }
-
     private Node<T> SearchRecursive(Node<T> current, T value) {
         if (current == null) {
             System.out.println("Value " + value + " not found!");

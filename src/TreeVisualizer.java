@@ -7,11 +7,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import javafx.application.Platform;
 
 public class TreeVisualizer extends Application {
 
@@ -85,23 +83,15 @@ public class TreeVisualizer extends Application {
         gc.fillText(label, x - 5 - (label.length() * 2), y + 4);
     }
 
+    private static boolean isLaunched = false;
+    private static Stage activeStage = null;
+
     @Override
     public void start(Stage primaryStage) {
+        activeStage = primaryStage;
         primaryStage.setTitle("Visualizador de Árvore Binária de Jogadores");
 
-        BinarySearchTree<Player> bst = new BinarySearchTree<>();
-
-        try (BufferedReader br = new BufferedReader(new FileReader("src/players.csv"))) {
-            String line = br.readLine(); // skip header
-            while ((line = br.readLine()) != null) {
-                String[] values = line.split(",");
-                if (values.length == 2) {
-                    bst.Insert(new Player(values[0].trim(), Integer.parseInt(values[1].trim())));
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        BinarySearchTree<Player> bst = ConsoleMenu.bst;
 
         int height = getHeight(bst.getRoot());
         int canvasHeight = 100 + height * V_SPACING;
@@ -116,10 +106,35 @@ public class TreeVisualizer extends Application {
 
         Scene scene = new Scene(scrollPane, 1000, 600);
         primaryStage.setScene(scene);
+
+        // Prevent implicit exit so JavaFX doesn't completely die when window closes
+        Platform.setImplicitExit(false);
+
         primaryStage.show();
     }
 
     public static void Launch() {
-        launch();
+        if (!isLaunched) {
+            isLaunched = true;
+            new Thread(() -> {
+                try {
+                    Application.launch(TreeVisualizer.class);
+                } catch (Exception e) {
+                    System.out.println("GUI failed to start.");
+                }
+            }).start();
+        } else {
+            // Already launched in this session. Run later on the FX thread.
+            Platform.runLater(() -> {
+                try {
+                    if (activeStage != null && activeStage.isShowing()) {
+                        activeStage.close(); // Close the old window
+                    }
+                    new TreeVisualizer().start(new Stage()); // Open a fresh one
+                } catch (Exception e) {
+                    System.out.println("Could not open GUI.");
+                }
+            });
+        }
     }
 }
