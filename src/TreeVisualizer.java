@@ -1,104 +1,120 @@
 import javafx.application.Application;
-import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TreeVisualizer extends Application {
 
-    // Classe Node para a árvore binária de busca
-    static class Node {
-        // Adicionar propriedades do Node
+    // Helper method to get height
+    private int getHeight(Node<?> node) {
+        if (node == null) {
+            return 0;
+        }
+        return 1 + Math.max(getHeight(node.left), getHeight(node.right));
     }
 
-    // Classe da árvore binária de busca
-    static class MorseBST {
-        private Node root;
+    private int xCounter = 0;
+    private final int H_SPACING = 50;
+    private final int V_SPACING = 70;
 
-        public MorseBST() {
-            // Implementar inicializações necessárias
+    private void calculateXCoords(Node<?> node, Map<Node<?>, Integer> xCoords) {
+        if (node == null) return;
+        calculateXCoords(node.left, xCoords);
+        xCoords.put(node, ++xCounter * H_SPACING);
+        calculateXCoords(node.right, xCoords);
+    }
+
+    public void drawTree(Canvas canvas, BinarySearchTree<Player> tree) {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(2);
+        gc.setFont(new Font(10));
+
+        if (tree.getRoot() != null) {
+            Map<Node<?>, Integer> xCoords = new HashMap<>();
+            xCounter = 0;
+            calculateXCoords(tree.getRoot(), xCoords);
+
+            // Adjust canvas width based on the number of nodes
+            canvas.setWidth(xCounter * H_SPACING + 100);
+
+            drawNodePositions(gc, tree.getRoot(), xCoords, 50);
+        }
+    }
+
+    private void drawNodePositions(GraphicsContext gc, Node<Player> node, Map<Node<?>, Integer> xCoords, double y) {
+        if (node == null) {
+            return;
         }
 
-        public void insert(char letter, String morseCode) {
-            // Inserir lógica de inserção: ponto (.) para a esquerda e traço (-) para a direita
+        double x = xCoords.get(node);
+
+        if (node.left != null) {
+            double newX = xCoords.get(node.left);
+            double newY = y + V_SPACING;
+            gc.strokeLine(x, y + 20, newX, newY - 20);
+            drawNodePositions(gc, node.left, xCoords, newY);
         }
 
-        // Adicione métodos para codificar e decodificar código morse
-
-        // Calcula a altura da árvore
-        public int getHeight() {
-            return getHeight(root);
+        if (node.right != null) {
+            double newX = xCoords.get(node.right);
+            double newY = y + V_SPACING;
+            gc.strokeLine(x, y + 20, newX, newY - 20);
+            drawNodePositions(gc, node.right, xCoords, newY);
         }
 
-        private int getHeight(Node node) {
-            if (node == null) {
-                return 0;
-            }
-            return 1 + Math.max(getHeight(node.left), getHeight(node.right));
-        }
+        // Draw circles again on top of lines
+        gc.setFill(Color.WHITE);
+        gc.fillOval(x - 20, y - 20, 40, 40);
+        gc.setStroke(Color.BLACK);
+        gc.strokeOval(x - 20, y - 20, 40, 40);
 
-        public void drawTree(Canvas canvas) {
-            GraphicsContext gc = canvas.getGraphicsContext2D();
-            gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-            gc.setStroke(Color.BLACK);
-            gc.setLineWidth(2);
-
-            // Começa o desenho da árvore na raiz
-            drawNode(gc, root, canvas.getWidth() / 2, 40, canvas.getWidth() / 4, 1);
-        }
-
-        private void drawNode(GraphicsContext gc, Node node, double x, double y, double xOffset, int level) {
-            if (node == null) {
-                return;
-            }
-
-            // Desenha um círculo ao redor do nó
-            gc.setStroke(Color.BLACK);
-            gc.strokeOval(x - 15, y - 15, 30, 30); // Desenha o círculo com raio 15
-
-            // Desenha a letra dentro do círculo
-            gc.strokeText(String.valueOf(node.letter == ' ' ? ' ' : node.letter), x - 5, y + 5);
-
-            // Desenho das linhas para os nós filhos
-            if (node.left != null) {
-                double newX = x - xOffset;
-                double newY = y + 120; // Aumentei o espaçamento vertical
-                gc.strokeLine(x, y + 15, newX, newY - 15); // Linha entre o nó atual e o filho à esquerda
-                drawNode(gc, node.left, newX, newY, xOffset / 2, level + 1);
-            }
-
-            if (node.right != null) {
-                double newX = x + xOffset;
-                double newY = y + 120; // Aumentei o espaçamento vertical
-                gc.strokeLine(x, y + 15, newX, newY - 15); // Linha entre o nó atual e o filho à direita
-                drawNode(gc, node.right, newX, newY, xOffset / 2, level + 1);
-            }
-        }
+        gc.setFill(Color.BLACK);
+        String label = String.valueOf(node.value.getRanking());
+        gc.fillText(label, x - 5 - (label.length() * 2), y + 4);
     }
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Visualizador de Árvore Binária");
+        primaryStage.setTitle("Visualizador de Árvore Binária de Jogadores");
 
-        MorseBST bst = new MorseBST();
+        BinarySearchTree<Player> bst = new BinarySearchTree<>();
 
-        // Adicione o alfabeto com seus códigos Morse
+        try (BufferedReader br = new BufferedReader(new FileReader("src/players.csv"))) {
+            String line = br.readLine(); // skip header
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                if (values.length == 2) {
+                    bst.Insert(new Player(values[0].trim(), Integer.parseInt(values[1].trim())));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+        int height = getHeight(bst.getRoot());
+        int canvasHeight = 100 + height * V_SPACING;
 
-        // Inicialização de Janela
-        int height = bst.getHeight();
-        int canvasHeight = 100 + height * 100;
-        int canvasWidth = (int) Math.pow(2, height) * 40;
+        Canvas canvas = new Canvas(800, canvasHeight); // Width will be dynamically adjusted in drawTree
+        drawTree(canvas, bst);
 
-        Canvas canvas = new Canvas(canvasWidth, canvasHeight);
-        bst.drawTree(canvas);
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(canvas);
+        scrollPane.setPannable(true);
+        scrollPane.setFitToHeight(true);
 
-        Group root = new Group();
-        root.getChildren().add(canvas);
-
-        Scene scene = new Scene(root, canvasWidth, canvasHeight);
+        Scene scene = new Scene(scrollPane, 1000, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
     }

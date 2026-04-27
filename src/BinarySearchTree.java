@@ -2,6 +2,8 @@ public class BinarySearchTree<T extends Comparable<T>> {
 
     private Node<T> root;
 
+    public Node<T> getRoot() { return root; }
+
     public void Insert(T value) { root = insertRecursive(root, value); }
 
     private Node<T> insertRecursive(Node<T> current, T value) {
