@@ -2,16 +2,7 @@ public class BinarySearchTree {
 
     private Node root;
     public Node getRoot() { return root; }
-
-    private String findMin(Node node) {
-        String min = node.player.getNickname();
-        while (node.left != null) {
-            min = node.left.player.getNickname();
-            node = node.left;
-        }
-        return min;
-    }
-
+    
     private Player findMinPlayer(Node node) {
         Player min = node.player;
         while (node.left != null) {
