@@ -21,10 +21,17 @@ public class BinarySearchTree {
         return min;
     }
 
-    public void insert(Player j) { root = insert(root, j); }
-    private Node insert(Node current, Player j) {
+    public void insert(Player j) {
+        if (search(j.getNickname())) {
+            System.out.println("Player " + j.getNickname() + " already exists!");
+            return;
+        }
+        root = insert(root, j);
+    }
 
+    private Node insert(Node current, Player j) {
         if (current == null) { return new Node(j); }
+
 
         int comparison = Integer.compare(j.getRanking(), current.player.getRanking());
 
