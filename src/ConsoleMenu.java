@@ -4,7 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class ConsoleMenu {
-    public static BinarySearchTree<Player> bst = new BinarySearchTree<>();
+    public static BinarySearchTree bst = new BinarySearchTree();
 
     public static void run() {
         loadData();
@@ -32,43 +32,40 @@ public class ConsoleMenu {
 
             switch (choice) {
                 case 1:
+                    System.out.print("Enter player nickname: ");
+                    String name = scanner.next();
                     System.out.print("Enter player ranking to insert: ");
                     if (scanner.hasNextInt()) {
                         int rank = scanner.nextInt();
-                        System.out.print("Enter player nickname: ");
-                        String name = scanner.next();
-                        bst.Insert(new Player(name, rank));
+                        bst.insert(new Player(name, rank));
                     } else {
                         System.out.println("Invalid input.");
                         scanner.next();
                     }
                     break;
                 case 2:
-                    System.out.print("Enter player ranking to remove: ");
-                    if (scanner.hasNextInt()) {
-                        bst.Remove(new Player("", scanner.nextInt()));
+                    System.out.print("Enter player nickname to remove: ");
+                    String removeName = scanner.next();
+                    Player removed = bst.remove(removeName);
+                    if (removed != null) {
+                        System.out.println("Successfully removed player: " + removed.getNickname());
                     } else {
-                        System.out.println("Invalid input.");
-                        scanner.next();
+                        System.out.println("Player " + removeName + " not found!");
                     }
                     break;
                 case 3:
-                    System.out.print("Enter player ranking to search: ");
-                    if (scanner.hasNextInt()) {
-                        int val = scanner.nextInt();
-                        Player target = new Player("", val);
-                        Node<Player> result = bst.Search(target);
-                        if (result != null) {
-                            System.out.println("Success! Found: " + result.value.toString());
-                        }
+                    System.out.print("Enter player nickname to search: ");
+                    String searchName = scanner.next();
+                    boolean found = bst.search(searchName);
+                    if (found) {
+                        System.out.println("Success! Found player " + searchName + " in the tree.");
                     } else {
-                        System.out.println("Invalid input.");
-                        scanner.next();
+                        System.out.println("Player " + searchName + " not found!");
                     }
                     break;
                 case 4:
                     System.out.println("\nTree contents:");
-                    System.out.println(bst.toString());
+                    System.out.println(bst);
                     break;
                 case 5:
                     System.out.println("Launching visualizer...");
@@ -89,10 +86,11 @@ public class ConsoleMenu {
     private static void loadData() {
         try (BufferedReader br = new BufferedReader(new FileReader("src/players.csv"))) {
             String line = br.readLine(); // skip header
+
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
                 if (values.length == 2) {
-                    bst.Insert(new Player(values[0].trim(), Integer.parseInt(values[1].trim())));
+                    bst.insert(new Player(values[0].trim(), Integer.parseInt(values[1].trim())));
                 }
             }
         } catch (IOException e) {

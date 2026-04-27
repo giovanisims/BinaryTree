@@ -1,4 +1,4 @@
-public class Player implements Comparable<Player> {
+public class Player {
 
     String nickname;
     int ranking;
@@ -13,11 +13,6 @@ public class Player implements Comparable<Player> {
 
     public int getRanking() { return ranking; }
     public void setRanking(int ranking) { this.ranking = ranking; }
-
-    @Override
-    public int compareTo(Player other) {
-        return Integer.compare(this.ranking, other.ranking);
-    }
 
     @Override
     public String toString() {

@@ -1,6 +1,9 @@
-public class Node<T> {
-    T value;
-    Node<T> left, right;
-    Node(T value) {this.value = value;}
-}
+public class Node {
+    public Player player;
+    public Node left;
+    public Node right;
 
+    public Node(Player player) {
+        this.player = player;
+    }
+}

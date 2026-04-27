@@ -14,7 +14,7 @@ import javafx.application.Platform;
 public class TreeVisualizer extends Application {
 
     // Helper method to get height
-    private int getHeight(Node<?> node) {
+    private int getHeight(Node node) {
         if (node == null) {
             return 0;
         }
@@ -22,17 +22,17 @@ public class TreeVisualizer extends Application {
     }
 
     private int xCounter = 0;
-    private final int H_SPACING = 25;
-    private final int V_SPACING = 50;
+    private final int H_SPACING = 90;
+    private final int V_SPACING = 60;
 
-    private void calculateXCoords(Node<?> node, Map<Node<?>, Integer> xCoords) {
+    private void calculateXCoords(Node node, Map<Node, Integer> xCoords) {
         if (node == null) return;
         calculateXCoords(node.left, xCoords);
         xCoords.put(node, ++xCounter * H_SPACING);
         calculateXCoords(node.right, xCoords);
     }
 
-    public void drawTree(Canvas canvas, BinarySearchTree<Player> tree) {
+    public void drawTree(Canvas canvas, BinarySearchTree tree) {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         gc.setStroke(Color.BLACK);
@@ -40,7 +40,7 @@ public class TreeVisualizer extends Application {
         gc.setFont(new Font(10));
 
         if (tree.getRoot() != null) {
-            Map<Node<?>, Integer> xCoords = new HashMap<>();
+            Map<Node, Integer> xCoords = new HashMap<>();
             xCounter = 0;
             calculateXCoords(tree.getRoot(), xCoords);
 
@@ -51,7 +51,7 @@ public class TreeVisualizer extends Application {
         }
     }
 
-    private void drawNodePositions(GraphicsContext gc, Node<Player> node, Map<Node<?>, Integer> xCoords, double y) {
+    private void drawNodePositions(GraphicsContext gc, Node node, Map<Node, Integer> xCoords, double y) {
         if (node == null) {
             return;
         }
@@ -61,26 +61,26 @@ public class TreeVisualizer extends Application {
         if (node.left != null) {
             double newX = xCoords.get(node.left);
             double newY = y + V_SPACING;
-            gc.strokeLine(x, y + 20, newX, newY - 20);
+            gc.strokeLine(x, y + 15, newX, newY - 15);
             drawNodePositions(gc, node.left, xCoords, newY);
         }
 
         if (node.right != null) {
             double newX = xCoords.get(node.right);
             double newY = y + V_SPACING;
-            gc.strokeLine(x, y + 20, newX, newY - 20);
+            gc.strokeLine(x, y + 15, newX, newY - 15);
             drawNodePositions(gc, node.right, xCoords, newY);
         }
 
-        // Draw circles again on top of lines
+        // Draw rectangular nodes (rounded)
         gc.setFill(Color.WHITE);
-        gc.fillOval(x - 20, y - 20, 40, 40);
+        gc.fillRoundRect(x - 40, y - 15, 80, 30, 20, 20);
         gc.setStroke(Color.BLACK);
-        gc.strokeOval(x - 20, y - 20, 40, 40);
+        gc.strokeRoundRect(x - 40, y - 15, 80, 30, 20, 20);
 
         gc.setFill(Color.BLACK);
-        String label = String.valueOf(node.value.getRanking());
-        gc.fillText(label, x - 5 - (label.length() * 2), y + 4);
+        String label = node.player.getNickname() + " (" + node.player.getRanking() + ")";
+        gc.fillText(label, x - (label.length() * 2.8), y + 4);
     }
 
     private static boolean isLaunched = false;
@@ -91,7 +91,7 @@ public class TreeVisualizer extends Application {
         activeStage = primaryStage;
         primaryStage.setTitle("Visualizador de Árvore Binária de Jogadores");
 
-        BinarySearchTree<Player> bst = ConsoleMenu.bst;
+        BinarySearchTree bst = ConsoleMenu.bst;
 
         int height = getHeight(bst.getRoot());
         int canvasHeight = 100 + height * V_SPACING;

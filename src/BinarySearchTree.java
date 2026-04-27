@@ -1,48 +1,66 @@
-public class BinarySearchTree<T extends Comparable<T>> {
+public class BinarySearchTree {
 
-    private Node<T> root;
-    public Node<T> getRoot() { return root; }
+    private Node root;
+    public Node getRoot() { return root; }
 
-    private T findMin(Node<T> node) {
-        T min = node.value;
+    private String findMin(Node node) {
+        String min = node.player.getNickname();
         while (node.left != null) {
-            min = node.left.value;
+            min = node.left.player.getNickname();
             node = node.left;
         }
         return min;
     }
 
-    public void Insert(T value) { root = insertRecursive(root, value); }
-    private Node<T> insertRecursive(Node<T> current, T value) {
+    private Player findMinPlayer(Node node) {
+        Player min = node.player;
+        while (node.left != null) {
+            min = node.left.player;
+            node = node.left;
+        }
+        return min;
+    }
 
-        if (current == null) { return new Node<>(value); }
+    public void insert(Player j) { root = insert(root, j); }
+    private Node insert(Node current, Player j) {
 
-        int comparison = value.compareTo(current.value);
+        if (current == null) { return new Node(j); }
+
+        int comparison = Integer.compare(j.getRanking(), current.player.getRanking());
 
         if (comparison < 0) {
-            current.left = insertRecursive(current.left, value);
+            current.left = insert(current.left, j);
         } else if (comparison > 0) {
-            current.right = insertRecursive(current.right, value);
+            current.right = insert(current.right, j);
         } else {
-            System.out.println("Value " + value + " already exists!");
+            System.out.println("Player with ranking " + j.getRanking() + " already exists!");
         }
 
         return current;
     }
 
-    public void Remove(T value) { root = RemoveRecursive(root, value); }
-    private Node<T> RemoveRecursive(Node<T> current, T value) {
+    public Player remove(String name) {
+        Node target = search(root, name);
+        if (target == null) return null;
+        Player removedPlayer = target.player;
+        root = remove(root, name);
+        return removedPlayer;
+    }
+
+    private Node remove(Node current, String name) {
         if (current == null) {
-            System.out.println("Value " + value + " not found!");
             return null;
         }
 
-        int comparison = value.compareTo(current.value);
+        Node target = search(root, name);
+        if (target == null) return current;
 
-        if (comparison < 0) {
-            current.left = RemoveRecursive(current.left, value);
-        } else if (comparison > 0) {
-            current.right = RemoveRecursive(current.right, value);
+        int targetRank = target.player.getRanking();
+
+        if (targetRank < current.player.getRanking()) {
+            current.left = remove(current.left, name);
+        } else if (targetRank > current.player.getRanking()) {
+            current.right = remove(current.right, name);
         } else {
             if (current.left == null) {
                 return current.right;
@@ -50,39 +68,37 @@ public class BinarySearchTree<T extends Comparable<T>> {
                 return current.left;
             }
 
-            current.value = findMin(current.right);
-            current.right = RemoveRecursive(current.right, current.value);
+            current.player = findMinPlayer(current.right);
+            current.right = remove(current.right, current.player.getNickname());
         }
 
         return current;
     }
 
+    public boolean search(String name) { return search(root, name) != null; }
 
-    public Node<T> Search(T value) { return SearchRecursive(root, value); }
-    private Node<T> SearchRecursive(Node<T> current, T value) {
+    private Node search(Node current, String name) {
         if (current == null) {
-            System.out.println("Value " + value + " not found!");
             return null;
         }
 
-        int comparison = value.compareTo(current.value);
-
-        if (comparison < 0) {
-            return SearchRecursive(current.left, value);
-        } else if (comparison > 0) {
-            return SearchRecursive(current.right, value);
-        } else {
+        if (current.player.getNickname().equalsIgnoreCase(name)) {
             return current;
         }
+
+        Node leftResult = search(current.left, name);
+        if (leftResult != null) return leftResult;
+
+        return search(current.right, name);
     }
 
     @Override
     public String toString() { return root == null ? "Tree is empty" : toStringRecursive(root).trim(); }
-    private String toStringRecursive(Node<T> current) {
+    private String toStringRecursive(Node current) {
         if (current == null) { return ""; }
 
         return toStringRecursive(current.left)
-                + current.value + " "
+                + current.player.toString() + "\n"
                 + toStringRecursive(current.right);
     }
 }
