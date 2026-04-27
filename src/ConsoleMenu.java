@@ -41,7 +41,11 @@ public class ConsoleMenu {
                             System.out.println("Failed to insert: Player '" + name + "' already exists!");
                         } else {
                             bst.insert(new Player(name, rank));
-                            System.out.println("Successfully inserted player: " + name);
+                            if (bst.search(name)) {
+                                System.out.println("Successfully inserted player: " + name);
+                            } else {
+                                System.out.println("Failed to insert player: " + name);
+                            }
                         }
                     } else {
                         System.out.println("Invalid input.");

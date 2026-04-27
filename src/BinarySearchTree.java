@@ -13,24 +13,22 @@ public class BinarySearchTree {
         return node.player;
     }
 
-    public void insert(Player j) {
-        if (search(j.getNickname())) {
+    public void insert(Player player) {
+        if (search(player.getNickname())) {
             return;
         }
-        root = insert(root, j);
+        root = insert(root, player);
     }
 
-    private Node insert(Node current, Player j) {
+    private Node insert(Node current, Player player) {
         if (current == null) {
-            return new Node(j);
+            return new Node(player);
         }
 
-        int comparison = Integer.compare(j.getRanking(), current.player.getRanking());
-
-        if (comparison < 0) {
-            current.left = insert(current.left, j);
-        } else if (comparison > 0) {
-            current.right = insert(current.right, j);
+        if (player.getRanking() < current.player.getRanking()) {
+            current.left = insert(current.left, player);
+        } else if (player.getRanking() > current.player.getRanking()) {
+            current.right = insert(current.right, player);
         }
 
         return current;

@@ -74,7 +74,7 @@ public class TreeVisualizer extends JPanel {
         g2d.setColor(Color.BLACK);
         g2d.drawRoundRect(x - 35, y - 12, 70, 24, 15, 15);
 
-        String labelString = node.player.getNickname() + " (" + node.player.getRanking() + ")";
+        String labelString = node.player.getNickname();
         FontMetrics fm = g2d.getFontMetrics();
         int textWidth = fm.stringWidth(labelString);
         g2d.drawString(labelString, x - (textWidth / 2), y + 4);
