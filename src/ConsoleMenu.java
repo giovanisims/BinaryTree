@@ -25,7 +25,7 @@ public class ConsoleMenu {
             if (scanner.hasNextInt()) {
                 choice = scanner.nextInt();
             } else {
-                scanner.next(); // clear invalid input
+                scanner.next();
                 System.out.println("Invalid input. Please enter a number.");
                 continue;
             }
@@ -85,7 +85,7 @@ public class ConsoleMenu {
 
     private static void loadData() {
         try (BufferedReader br = new BufferedReader(new FileReader("src/players.csv"))) {
-            String line = br.readLine(); // skip header
+            String line = br.readLine();
 
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
