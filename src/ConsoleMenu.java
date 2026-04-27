@@ -37,7 +37,12 @@ public class ConsoleMenu {
                     System.out.print("Enter player ranking to insert: ");
                     if (scanner.hasNextInt()) {
                         int rank = scanner.nextInt();
-                        bst.insert(new Player(name, rank));
+                        if (bst.search(name)) {
+                            System.out.println("Failed to insert: Player '" + name + "' already exists!");
+                        } else {
+                            bst.insert(new Player(name, rank));
+                            System.out.println("Successfully inserted player: " + name);
+                        }
                     } else {
                         System.out.println("Invalid input.");
                         scanner.next();
